@@ -9,5 +9,7 @@ Interactive pieces to payday lending story.
 
 ## Data Processing
 
-* Need to combine Zip shapes with Zip poverty rates
+In order to combine the CSV and [MN Zip Shapefile](zips-below-poverty-line-mn-v2.csv), used QGIS and [Mapbox's helpful instructions](http://mapbox.com/tilemill/docs/guides/joining-data/).
+
+
 * Need to geocode payday lender locations
