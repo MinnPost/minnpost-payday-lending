@@ -99,6 +99,24 @@
         text-align: right;
       }
       
+      .tooltip-container {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 20;
+        -moz-border-radius: 4px;
+        -webkit-border-radius: 4px;
+        border-radius: 4px;
+        min-width: 140px;
+        min-height: 75px;
+        background-color: #222222;
+        background-color: rgba(20, 20, 20, 0.7);
+        color: #E2E2E2;
+        padding: 15px;
+        border: 1px solid #666666;
+        border: 1px solid rgba(98, 98, 98, 0.7);
+      }
+      
       /**
        * Responsive creen size styles
        */
@@ -171,6 +189,21 @@
       </div>
     </script>
     
+    <script id="template-tooltip-container" type="text/template">
+      <div class="tooltip-container">
+      </div>
+    </script>
+    
+    <script id="template-tooltip" type="text/template">
+      <div class="tooltip">
+        <div class="tooltip-zip">
+          Zip: <%= ZCTA5CE10 %>
+        </div>
+        <div class="tooltip-poverty">
+          Percent below poverty level: <%= percent_be %>%
+        </div>
+      </div>
+    </script>
     
     
     <!-- jQuery that is used on MinnPost site (ensures test environment) -->
@@ -185,6 +218,7 @@
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/underscore-1.3.3/underscore-min.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/jquery-custom-master-20120606/jquery-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/leaflet-0.4.5/leaflet.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/wax-v6.0.4/wax.leaf.min.js"></script>
 
     
     <script type="text/javascript">
@@ -193,6 +227,7 @@
       
       (function($, w, undefined) {
         var config = {
+          mapID: 'map-payday-lending-poverty',
           center: [46.52863469527167, -94.680175781254],
           zoom: 6,
           zoomMax: 15,
@@ -207,8 +242,11 @@
             fillColor: 'blue',
             fillOpacity: 0.4
           },
+          tooltipSelector: '.tooltip-container',
           templates: {
-            popup: $('#template-popup').html()
+            popup: $('#template-popup').html(),
+            tooltipContainer: $('#template-tooltip-container').html(),
+            tooltip: $('#template-tooltip').html()
           }
         };
         var dataDir = '../data/';
@@ -221,13 +259,37 @@
         }
         
         // Main callback once data is loaded
-        var drawMap = function(lendersData) {
-        
-          var map = new L.map('map-payday-lending-poverty').setView(config.center, config.zoom);
+        var drawMap = function(lendersData, povertyTileJSON) {
+          var map = new L.map(config.mapID).setView(config.center, config.zoom);
           
           // Base layer
           var baseLayer = new L.TileLayer('http://{s}.tiles.mapbox.com/v3/minnpost.map-wi88b700/{z}/{x}/{y}.png');
           map.addLayer(baseLayer);
+          
+          // Overlay of poverty and tooltip
+          var overlay = new wax.leaf.connector(povertyTileJSON);
+          map.addLayer(overlay);
+          var interaction = wax.leaf.interaction()
+            .map(map)
+            .tilejson(povertyTileJSON)
+            .on({
+              on: function(e) {
+                var $tooltip = $(config.tooltipSelector);
+                if ($tooltip.length === 0) {
+                  $(config.templates.tooltipContainer)
+                    .appendTo($('#' + config.mapID));
+                }
+                $tooltip.show();
+                
+                // Check if we should show
+                if (typeof e.data != 'undefined') {
+                  $(config.tooltipSelector).html(_.template(config.templates.tooltip , e.data));
+                }
+              },
+              off: function(e) {
+                $(config.tooltipSelector).hide();
+              }
+            });
           
           // Add markers for for lenders
           _.each(lendersData, function(lender, i) {
@@ -262,8 +324,11 @@
           
           // Callback for JSONP data
           window.payday_lenders_callback = function(data) {
-            $('#application-container').html($('#template-map-container').html());
-            drawMap(data);
+            // Get tilejson data
+            wax.tilejson('http://api.tiles.mapbox.com/v3/minnpost.payday-lending.jsonp', function(tilejson) {
+              $('#application-container').html($('#template-map-container').html());
+              drawMap(data, tilejson);
+            });
           };
           
           $.ajax({
