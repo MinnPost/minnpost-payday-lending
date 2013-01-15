@@ -1,13 +1,13 @@
 {
   "bounds": [
-    -97.2565,
+    -97.3553,
     43.4489,
     -89.4122,
-    49.3931
+    49.4503
   ],
   "center": [
-    -89.4946,
-    47.0252,
+    -93.9166,
+    46.2064,
     7
   ],
   "format": "png",
@@ -29,8 +29,8 @@
       "percent_be"
     ]
   },
-  "minzoom": 4,
-  "maxzoom": 10,
+  "minzoom": 2,
+  "maxzoom": 12,
   "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
   "Stylesheet": [
     "style.mss"
@@ -47,7 +47,7 @@
       "id": "tl201027zcta510below",
       "class": "",
       "Datasource": {
-        "file": "C:\\Users\\Shadowflare\\Desktop\\New folder\\data\\tl_2010_27_zcta510-below-povertyline.shp",
+        "file": "../../data/tl_2010_27_zcta510-below-povertyline.zip",
         "id": "tl201027zcta510below",
         "project": "payday",
         "srs": ""
@@ -60,8 +60,9 @@
   ],
   "scale": 1,
   "metatile": 2,
-  "name": "Payday Lenders in MN",
-  "description": "",
-  "attribution": "",
-  "legend": ""
+  "name": "Poverty Level by Zipcode",
+  "description": "Population below the poverty level by zipcode in Minnesota.  For Payday Lender story.",
+  "attribution": "US Census",
+  "legend": "",
+  "version": "3.0.0"
 }

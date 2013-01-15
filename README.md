@@ -12,4 +12,7 @@ Interactive pieces to payday lending story.
 
 * In order to combine the CSV and MN Zip Shapefile, used QGIS and [Mapbox's helpful instructions](http://mapbox.com/tilemill/docs/guides/joining-data/).
 * Payday lender locations were geocoded from address in bulk, and some manually found.
-* To create a JSON(P) file for use in visualization (uploaded to AWS), run the following:  ```csvjson data/payday-lenders-mn-v4.csv > data/payday-lenders-mn-v4.json; echo "payday_lenders_callback(" > data/payday-lenders-mn-v4.jsonp; cat data/payday-lenders-mn-v4.json >> data/payday-lenders-mn-v4.jsonp; echo ");" >> data/payday-lenders-mn-v4.jsonp;
+* To create a JSON(P) file for use in visualization (uploaded to AWS), run the following:  ```csvjson data/payday-lenders-mn-v4.csv > data/payday-lenders-mn-v4.json; echo "payday_lenders_callback(" > data/payday-lenders-mn-v4.jsonp; cat data/payday-lenders-mn-v4.json >> data/payday-lenders-mn-v4.jsonp; echo ");" >> data/payday-lenders-mn-v4.jsonp;```
+* To work on the tileset, link it up to your Mapbox projects using an absolute page (```pwd``` will help).
+    * Project: ```ln -s {PATH_TO_THIS_REPO}/data-processing/tiles/payday-lending ~/Documents/MapBox/project/payday-lending```
+    * Data: ```mkdir ~/Documents/MapBox/data/; ln -s {PATH_TO_THIS_REPO}/data/tl_2010_27_zcta510-below-povertyline.zip ~/Documents/MapBox/data/tl_2010_27_zcta510-below-povertyline.zip```
