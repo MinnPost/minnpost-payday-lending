@@ -1,0 +1,67 @@
+{
+  "bounds": [
+    -97.2565,
+    43.4489,
+    -89.4122,
+    49.3931
+  ],
+  "center": [
+    -89.4946,
+    47.0252,
+    7
+  ],
+  "format": "png",
+  "interactivity": {
+    "layer": "tl201027zcta510below",
+    "template_teaser": "{{{STATEFP10}}} {{{ZCTA5CE10}}} {{{GEOID10}}} {{{CLASSFP10}}} {{{MTFCC10}}} {{{FUNCSTAT10}}} {{{ALAND10}}} {{{AWATER10}}} {{{INTPTLAT10}}} {{{INTPTLON10}}} {{{PARTFLG10}}} {{{percent_be}}}",
+    "fields": [
+      "STATEFP10",
+      "ZCTA5CE10",
+      "GEOID10",
+      "CLASSFP10",
+      "MTFCC10",
+      "FUNCSTAT10",
+      "ALAND10",
+      "AWATER10",
+      "INTPTLAT10",
+      "INTPTLON10",
+      "PARTFLG10",
+      "percent_be"
+    ]
+  },
+  "minzoom": 4,
+  "maxzoom": 10,
+  "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+  "Stylesheet": [
+    "style.mss"
+  ],
+  "Layer": [
+    {
+      "geometry": "polygon",
+      "extent": [
+        -97.23919599999999,
+        43.499361,
+        -89.483385,
+        49.384358
+      ],
+      "id": "tl201027zcta510below",
+      "class": "",
+      "Datasource": {
+        "file": "C:\\Users\\Shadowflare\\Desktop\\New folder\\data\\tl_2010_27_zcta510-below-povertyline.shp",
+        "id": "tl201027zcta510below",
+        "project": "payday",
+        "srs": ""
+      },
+      "srs-name": "autodetect",
+      "srs": "",
+      "advanced": {},
+      "name": "tl201027zcta510below"
+    }
+  ],
+  "scale": 1,
+  "metatile": 2,
+  "name": "Payday Lenders in MN",
+  "description": "",
+  "attribution": "",
+  "legend": ""
+}
