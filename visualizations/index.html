@@ -35,8 +35,14 @@
   <!-- START: Embeddable -->
   <div class="node-body fieldlayout node-field-body">
     <style type="text/css">
-      @import url('https://s3.amazonaws.com/data.minnpost/js/mapbox.js-v0.6.7/mapbox.v0.6.7.css');
+      @import url('https://s3.amazonaws.com/data.minnpost/js/leaflet-0.4.5/leaflet.css');
     </style>
+    
+    <!--[if lte IE 8]>
+      <style type="text/css">
+        @import url('https://s3.amazonaws.com/data.minnpost/js/leaflet-0.4.5/leaflet.ie.css');
+      </style>
+    <![endif]-->
     
     <style type="text/css">
       #minnpost-payday-lending {
@@ -99,11 +105,6 @@
       </style>
     <![endif]-->
     
-    <!--[if lte IE 8]>
-      <style type="text/css">
-      </style>
-    <![endif]-->
-    
     
     <!-- Initial HTML for application -->
     <div id="minnpost-payday-lending">
@@ -156,7 +157,7 @@
     
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/underscore-1.3.3/underscore-min.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/jquery-custom-master-20120606/jquery-1.7.2.custom.min.js"></script>
-    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/mapbox.js-v0.6.7/mapbox.v0.6.7.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/leaflet-0.4.5/leaflet.js"></script>
 
     
     <script type="text/javascript">
@@ -165,41 +166,49 @@
       
       (function($, w, undefined) {
         var config = {
-          center: { lat: 46.52863469527167, lon: -94.680175781254 },
-          zoom: 6
+          center: [46.52863469527167, -94.680175781254],
+          zoom: 6,
+          zoomMax: 15,
+          circleR: 4,
+          circleSyle: {
+            stroke: true,
+            color: 'blue',
+            weight: 1,
+            opacity: .9,
+            fill: true,
+            fillColor: 'blue',
+            fillOpacity: 0.4
+          }
         };
+        var dataDir = '../data/';
+        var imagesDir = './images/';
         
-        var drawMap = function() {
-          var map = mapbox.map('map-payday-lending-poverty');
-          
-          // UI
-          map.ui.fullscreen.add();
-          map.ui.hash.add();
-          map.ui.zoomer.add();
-          map.ui.zoombox.add();
+        // Determine if we should use remote resources
+        if (location.host.indexOf('localhost') === -1) {
+          dataDir = 'https://s3.amazonaws.com/data.minnpost/projects/minnpost-payday-lending/data/';
+          imagesDir = 'https://s3.amazonaws.com/data.minnpost/projects/minnpost-payday-lending/images/';
+        }
+        
+        // Main callback once data is loaded
+        var drawMap = function(lendersData) {
+        
+          var map = new L.map('map-payday-lending-poverty').setView([46.52863469527167, -94.680175781254], 6);
           
           // Base layer
-          var baseLayer = mapbox.layer().id('minnpost.map-wi88b700');
+          var baseLayer = new L.TileLayer('http://{s}.tiles.mapbox.com/v3/minnpost.map-wi88b700/{z}/{x}/{y}.png');
           map.addLayer(baseLayer);
           
-          // Center and zoom on MN
-          map.centerzoom(config.center, config.zoom);
-          
-          /*
-            // Create a markers layer with features from a CSV string.
-            // If you have a remote CSV file (on the same server, though,
-            // due to the same origin policy
-            // http://en.wikipedia.org/wiki/Same_origin_policy
-            // Then you can use jQuery.ajax or reqwest to do an AJAX request
-            // for its content.
-            var markerLayer = mapbox.markers.layer().csv('lat,lon,title,marker-color\n40.5,14,Naples,#180392');
-          
-            // Add interaction to this marker layer. This
-            // binds tooltips to each marker that has title
-            // and description defined.
-            mapbox.markers.interaction(markerLayer);
-            map.addLayer(markerLayer);
-          */
+          // Add markers for for lenders
+          _.each(lendersData, function(lender, i) {
+            var circle;
+            
+            if (lender.lat !== '') {
+              circle = new L.CircleMarker([parseFloat(lender.lat), parseFloat(lender.lon)])
+                .setRadius(config.circleR)
+                .setStyle(config.circleSyle);
+              map.addLayer(circle);
+            }
+          });
         };
           
         // When ready, make the magic happen
@@ -208,19 +217,17 @@
           $('#application-container').html($('#template-loading').html());
           
           // Callback for JSONP data
-          window.dataLoaded = function(data) {
+          window.payday_lenders_callback = function(data) {
             $('#application-container').html($('#template-map-container').html());
-            drawMap();
+            drawMap(data);
           };
-          window.dataLoaded();
-          /*
+          
           $.ajax({
             type: 'GET',
             dataType: 'jsonp',
-            url: dataDir + 'mn-county-2010.jsonp?callback=mn_county_2010',
+            url: dataDir + 'payday-lenders-mn-v4.jsonp?callback=payday_lenders_callback',
             jsonp: 'callback'
           });
-          */
         });
       })(jQueryCustom, window);
     </script>
