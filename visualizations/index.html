@@ -234,12 +234,12 @@
           popupZoom: 12,
           circleR: 4,
           circleSyle: {
-            stroke: true,
-            color: 'blue',
+            stroke: false,
+            color: '#1077CB',
             weight: 1,
             opacity: .9,
             fill: true,
-            fillColor: 'blue',
+            fillColor: '#1077CB',
             fillOpacity: 0.4
           },
           tooltipSelector: '.tooltip-container',
@@ -260,7 +260,10 @@
         
         // Main callback once data is loaded
         var drawMap = function(lendersData, povertyTileJSON) {
-          var map = new L.map(config.mapID).setView(config.center, config.zoom);
+          var map = new L.map(config.mapID, {
+            minZoom: config.zoom,
+            maxZoom: config.zoomMax
+          }).setView(config.center, config.zoom);
           
           // Base layer
           var baseLayer = new L.TileLayer('http://{s}.tiles.mapbox.com/v3/minnpost.map-wi88b700/{z}/{x}/{y}.png');
