@@ -16,3 +16,8 @@ Interactive pieces to payday lending story.
 * To work on the tileset, link it up to your Mapbox projects using an absolute page (```pwd``` will help).
     * Project: ```ln -s {PATH_TO_THIS_REPO}/data-processing/tiles/payday-lending ~/Documents/MapBox/project/payday-lending```
     * Data: ```mkdir ~/Documents/MapBox/data/; ln -s {PATH_TO_THIS_REPO}/data/tl_2010_27_zcta510-below-povertyline.zip ~/Documents/MapBox/data/tl_2010_27_zcta510-below-povertyline.zip```
+* Tiles uploaded to Mapbox for hosting.
+
+## Visualization
+
+* Go to ```visualizations/index.html``` in a browser.
