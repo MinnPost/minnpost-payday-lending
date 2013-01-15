@@ -10,7 +10,6 @@ Interactive pieces to payday lending story.
 
 ## Data Processing
 
-In order to combine the CSV and MN Zip Shapefile, used QGIS and [Mapbox's helpful instructions](http://mapbox.com/tilemill/docs/guides/joining-data/).
-
-
-* Need to geocode payday lender locations
+* In order to combine the CSV and MN Zip Shapefile, used QGIS and [Mapbox's helpful instructions](http://mapbox.com/tilemill/docs/guides/joining-data/).
+* Payday lender locations were geocoded from address in bulk, and some manually found.
+* To create a JSON(P) file for use in visualization, run the following:  ```csvjson data/payday-lenders-mn-v4.csv > data/payday-lenders-mn-v4.json; echo "payday_lenders_callback(" > data/payday-lenders-mn-v4.jsonp; cat data/payday-lenders-mn-v4.json >> data/payday-lenders-mn-v4.jsonp; echo ");" >> data/payday-lenders-mn-v4.jsonp;
