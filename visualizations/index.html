@@ -86,6 +86,10 @@
         height: 450px;
       }
       
+      .popup-container .popup-name {
+        font-weight: bold;
+      }
+      
       /**
        * Responsive creen size styles
        */
@@ -144,6 +148,20 @@
       </div>
     </script>
     
+    <script id="template-popup" type="text/template">
+      <div class="popup-container">
+        <div class="popup-name">
+          <%= name %>
+        </div>
+        <div class="popup-address">
+          <%= address_full %>
+        </div>
+        <div class="popup-zoom">
+          <a href="#" class="popup-zoom-in" data-id="<%= id %>">zoom</a>
+        </div>
+      </div>
+    </script>
+    
     
     
     <!-- jQuery that is used on MinnPost site (ensures test environment) -->
@@ -169,6 +187,7 @@
           center: [46.52863469527167, -94.680175781254],
           zoom: 6,
           zoomMax: 15,
+          popupZoom: 12,
           circleR: 4,
           circleSyle: {
             stroke: true,
@@ -178,6 +197,9 @@
             fill: true,
             fillColor: 'blue',
             fillOpacity: 0.4
+          },
+          templates: {
+            popup: $('#template-popup').html()
           }
         };
         var dataDir = '../data/';
@@ -192,7 +214,7 @@
         // Main callback once data is loaded
         var drawMap = function(lendersData) {
         
-          var map = new L.map('map-payday-lending-poverty').setView([46.52863469527167, -94.680175781254], 6);
+          var map = new L.map('map-payday-lending-poverty').setView(config.center, config.zoom);
           
           // Base layer
           var baseLayer = new L.TileLayer('http://{s}.tiles.mapbox.com/v3/minnpost.map-wi88b700/{z}/{x}/{y}.png');
@@ -201,13 +223,26 @@
           // Add markers for for lenders
           _.each(lendersData, function(lender, i) {
             var circle;
+            var point = [parseFloat(lender.lat), parseFloat(lender.lon)];
             
             if (lender.lat !== '') {
-              circle = new L.CircleMarker([parseFloat(lender.lat), parseFloat(lender.lon)])
+              circle = new L.CircleMarker(point)
                 .setRadius(config.circleR)
-                .setStyle(config.circleSyle);
+                .setStyle(config.circleSyle)
+                .bindPopup(_.template(config.templates.popup, lender));
               map.addLayer(circle);
             }
+          });
+          
+          // Event handling for zooming in 
+          map.on('popupopen', function(e) {
+            $('.popup-zoom-in').on('click', function(e) {
+              e.preventDefault();
+              
+              var id = $(this).attr('data-id');
+              var found = _.find(lendersData, function(lender) { return lender.id === id; });
+              map.setView([parseFloat(found.lat), parseFloat(found.lon)], config.popupZoom);
+            });
           });
         };
           
