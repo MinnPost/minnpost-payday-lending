@@ -100,6 +100,8 @@
       }
       
       .tooltip-container {
+        font-family: NimbusSanNovConD,Helvetica,Arial,Geneva,sans-serif;
+        text-align: right;
         position: absolute;
         top: 15px;
         right: 15px;
@@ -108,13 +110,17 @@
         -webkit-border-radius: 4px;
         border-radius: 4px;
         min-width: 140px;
-        min-height: 75px;
+        min-height: 50px;
         background-color: #222222;
         background-color: rgba(20, 20, 20, 0.7);
         color: #E2E2E2;
         padding: 15px;
         border: 1px solid #666666;
         border: 1px solid rgba(98, 98, 98, 0.7);
+      }
+      
+      .tooltip-container .tooltip-zip {
+        font-weight: bold;
       }
       
       /**
@@ -197,10 +203,10 @@
     <script id="template-tooltip" type="text/template">
       <div class="tooltip">
         <div class="tooltip-zip">
-          Zip: <%= ZCTA5CE10 %>
+          <%= ZCTA5CE10 %>
         </div>
         <div class="tooltip-poverty">
-          Percent below poverty level: <%= percent_be %>%
+          <%= percent_be %>% of the population <br /> below the poverty line. 
         </div>
       </div>
     </script>
