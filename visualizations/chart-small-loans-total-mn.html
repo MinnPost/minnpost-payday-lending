@@ -45,7 +45,7 @@
     <![endif]-->
     
     <style type="text/css">
-      #minnpost-chart-small-loans {
+      #minnpost-chart-small-loans-total {
         max-width: 960px;
         margin: 0 auto;
       }
@@ -81,7 +81,7 @@
         line-height: 100%;
       }
       
-      #chart-small-loans-container {
+      #chart-small-loans-container-total {
         width: 100%;
         height: 400px;
       }
@@ -107,12 +107,12 @@
     
     
     <!-- Initial HTML for application -->
-    <div id="minnpost-chart-small-loans">
+    <div id="minnpost-chart-small-loans-total">
       <noscript>
         <p>This application requires Javascript which is used to make your web browser more interactive.  If this message does not go away, please consider enabling Javascript.  Here are <a href="http://www.enable-javascript.com/" target="_blank">instructions on how to enable JavaScript in your web browser</a>.</p>
       </noscript>
       
-      <div id="chart-small-loans-container"></div>
+      <div id="chart-small-loans-total-container"></div>
       
       <p class="footnote">Small loan data for Minnesota provided by <a href="http://mn.gov/commerce/" target="_blank">Minnesota Department of Commerce</a>.</p>
     </div>
@@ -145,7 +145,7 @@
         $(document).ready(function() {
           var chart = new Highcharts.Chart({
             chart: {
-              renderTo: 'chart-small-loans-container',
+              renderTo: 'chart-small-loans-total-container',
               type: 'bar'
             },
             title: {
@@ -167,7 +167,7 @@
             tooltip: {
               formatter: function() {
                 return ''+
-                  this.series.name +': '+ this.y +'';
+                  this.series.name +': $'+ this.y +'';
               }
             },
             plotOptions: {
@@ -176,8 +176,8 @@
               }
             },
               series: [{
-              name: 'Number of Loans',
-              data: [4729, 24986, 70201, 132242, 136232, 241154, 212144, 186926, 172344, 230943, 277760, 336378, 350309]
+              name: 'Loan Total',
+              data: [1169101 , 6114216 , 16382355 , 30029908, 32724515, 61847305, 67141149, 58280035, 55667500, 76516241, 96425025, 123668268, 130462504]
             }]
           });
         });
