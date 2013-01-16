@@ -99,8 +99,53 @@
         text-align: right;
       }
       
+      
+      .legend-container {
+        font-family: NimbusSanNovConD,Helvetica,Arial,Geneva,sans-serif;
+        font-size: .75em;
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        z-index: 20;
+        -moz-border-radius: 4px;
+        -webkit-border-radius: 4px;
+        border-radius: 4px;
+        min-width: 140px;
+        min-height: 50px;
+        background-color: #222222;
+        background-color: rgba(20, 20, 20, 0.7);
+        color: #E2E2E2;
+        padding: 15px;
+        border: 1px solid #666666;
+        border: 1px solid rgba(98, 98, 98, 0.7);
+      }
+      
+      .legend-colors {
+        text-align: center;
+        margin-bottom: 10px; 
+      }
+      
+      .legend-color {
+        width: 15px;
+        height: 15px;
+        padding-bottom: 5px;
+        display: inline-block;
+        color: #FFFFFF;
+        font-size: .5em;
+        text-align: center;
+        zoom:1;
+        *display:inline;
+      }
+      
+      .legend-color.lender {
+        width: 10px;
+        height: 7px;
+        border-radius: 10px;
+      }
+      
       .tooltip-container {
         font-family: NimbusSanNovConD,Helvetica,Arial,Geneva,sans-serif;
+        font-size: .85em;
         text-align: right;
         position: absolute;
         top: 15px;
@@ -211,6 +256,27 @@
       </div>
     </script>
     
+    <script id="template-legend" type="text/template">
+      <div class="legend-container">
+        <div class="legend">
+          Percent of population below poverty
+          <div class="legend-colors">
+            <span class="legend-color" data-base="#CC1019" data-darken="0">0</span>
+            <span class="legend-color" data-base="#CC1019" data-darken="10">10</span>
+            <span class="legend-color" data-base="#CC1019" data-darken="25">20</span>
+            <span class="legend-color" data-base="#CC1019" data-darken="55">30</span>
+            <span class="legend-color" data-base="#CC1019" data-darken="70">40</span>
+            <span class="legend-color" data-base="#CC1019" data-darken="80">50+</span>
+          </div>
+          
+          Location of Payday Lender: 
+          <span class="legend-color lender" style="background-color: #1077CB;"></span>
+        </div>
+      </div>
+    </script>
+    
+    
+    
     
     <!-- jQuery that is used on MinnPost site (ensures test environment) -->
     <script type="text/javascript">
@@ -225,6 +291,8 @@
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/jquery-custom-master-20120606/jquery-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/leaflet-0.4.5/leaflet.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/wax-v6.0.4/wax.leaf.min.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/color-0.4.1/color-0.4.1.min.js"></script>
+    
 
     
     <script type="text/javascript">
@@ -252,7 +320,8 @@
           templates: {
             popup: $('#template-popup').html(),
             tooltipContainer: $('#template-tooltip-container').html(),
-            tooltip: $('#template-tooltip').html()
+            tooltip: $('#template-tooltip').html(),
+            legend: $('#template-legend').html()
           }
         };
         var dataDir = '../data/';
@@ -270,10 +339,21 @@
             minZoom: config.zoom,
             maxZoom: config.zoomMax
           }).setView(config.center, config.zoom);
+          map.attributionControl.setPrefix('');
           
           // Base layer
           var baseLayer = new L.TileLayer('http://{s}.tiles.mapbox.com/v3/minnpost.map-wi88b700/{z}/{x}/{y}.png');
           map.addLayer(baseLayer);
+          
+          // Add legend and make colors
+          $(config.templates.legend).appendTo($('#' + config.mapID));
+          $('.legend-colors .legend-color').each(function() {
+            var $this = $(this);
+            var color = Color($this.attr('data-base'));
+            var darken = parseFloat($this.attr('data-darken')) / 100;
+            console.log(color.darken(darken));
+            $(this).css('background-color', color.darken(darken).rgbString());
+          });
           
           // Overlay of poverty and tooltip
           var overlay = new wax.leaf.connector(povertyTileJSON);
