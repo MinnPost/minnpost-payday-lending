@@ -36,11 +36,13 @@
   <div class="node-body fieldlayout node-field-body">
     <style type="text/css">
       @import url('https://s3.amazonaws.com/data.minnpost/js/leaflet-0.4.5/leaflet.css');
+      @import url('https://s3.amazonaws.com/data.minnpost/js/leaflet-addons-0.1.1/leaflet-addons.css');
     </style>
     
     <!--[if lte IE 8]>
       <style type="text/css">
         @import url('https://s3.amazonaws.com/data.minnpost/js/leaflet-0.4.5/leaflet.ie.css');
+        @import url('https://s3.amazonaws.com/data.minnpost/js/leaflet-addons-0.1.1/leaflet-addons.ie.css');
       </style>
     <![endif]-->
     
@@ -187,6 +189,12 @@
           padding: 1em;
           margin: 1em 0 2em 0;
         }
+        .tooltip-container {
+          background-color: #222222;
+        }
+        .legend-container {
+          background-color: #222222;
+        }
       </style>
     <![endif]-->
     
@@ -302,7 +310,7 @@
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/jquery-custom-master-20120606/jquery-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/leaflet-0.4.5/leaflet.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/wax-v6.0.4/wax.leaf.min.js"></script>
-    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/color-0.4.1/color-0.4.1.min.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/leaflet-addons-0.1.1/leaflet-addons.min.js"></script>
     
 
     
@@ -316,6 +324,11 @@
           center: [46.52863469527167, -94.680175781254],
           zoom: 6,
           zoomMax: 15,
+          zoomBoxOptions: {
+            place: [44.95, -93.22],
+            zoom: 10,
+            title: 'Zoom into the Twin Cities metro area.'
+          },
           popupZoom: 12,
           circleR: { 0: 2, 7: 4, 8: 6, 10: 8, 11: 10 },
           circleSyle: {
@@ -365,6 +378,7 @@
             maxZoom: config.zoomMax
           }).setView(config.center, config.zoom);
           map.attributionControl.setPrefix('');
+          map.addControl(new L.Control.ZoomerButton(config.zoomBoxOptions));
           
           // Base layer
           var baseLayer = new L.TileLayer('http://{s}.tiles.mapbox.com/v3/minnpost.map-wi88b700/{z}/{x}/{y}.png');
@@ -374,8 +388,6 @@
           $(config.templates.legend).appendTo($('#' + config.mapID));
           $('.legend-colors .legend-color').each(function() {
             var $this = $(this);
-            var color = Color($this.attr('data-color'));
-            var darken = parseFloat($this.attr('data-darken')) / 100;
             $this.css('background-color', $this.attr('data-color'));
           });
           
