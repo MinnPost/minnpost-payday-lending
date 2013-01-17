@@ -115,7 +115,7 @@
         background-color: #222222;
         background-color: rgba(20, 20, 20, 0.7);
         color: #E2E2E2;
-        padding: 15px;
+        padding: 10px;
         border: 1px solid #666666;
         border: 1px solid rgba(98, 98, 98, 0.7);
       }
@@ -130,7 +130,7 @@
         height: 15px;
         padding-bottom: 5px;
         display: inline-block;
-        color: #FFFFFF;
+        color: #222222;
         font-size: .5em;
         text-align: center;
         zoom:1;
@@ -140,6 +140,9 @@
       .legend-color.lender {
         width: 10px;
         height: 7px;
+        margin-left: 5px;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
         border-radius: 10px;
       }
       
@@ -159,7 +162,7 @@
         background-color: #222222;
         background-color: rgba(20, 20, 20, 0.7);
         color: #E2E2E2;
-        padding: 15px;
+        padding: 10px;
         border: 1px solid #666666;
         border: 1px solid rgba(98, 98, 98, 0.7);
       }
@@ -261,16 +264,24 @@
         <div class="legend">
           Percent of population below poverty
           <div class="legend-colors">
-            <span class="legend-color" data-base="#CC1019" data-darken="0">0</span>
-            <span class="legend-color" data-base="#CC1019" data-darken="10">10</span>
-            <span class="legend-color" data-base="#CC1019" data-darken="25">20</span>
-            <span class="legend-color" data-base="#CC1019" data-darken="55">30</span>
-            <span class="legend-color" data-base="#CC1019" data-darken="70">40</span>
-            <span class="legend-color" data-base="#CC1019" data-darken="80">50+</span>
+            <!--    
+  [percent_be >= 0] { polygon-fill: #FFFFCC; }
+  [percent_be >= 5] { polygon-fill: #D9F0A3;}
+  [percent_be >= 10] { polygon-fill: #ADDD8E; }
+  [percent_be >= 15] { polygon-fill: #78C679; }
+  [percent_be >= 20] { polygon-fill: #31A354; }
+  [percent_be >= 25] { polygon-fill: #006837; }
+            -->
+            <span class="legend-color" data-color="#FFFFCC">0</span>
+            <span class="legend-color" data-color="#D9F0A3">5</span>
+            <span class="legend-color" data-color="#ADDD8E">10</span>
+            <span class="legend-color" data-color="#78C679">15</span>
+            <span class="legend-color" data-color="#31A354">20</span>
+            <span class="legend-color" data-color="#006837">25+</span>
           </div>
           
           Location of Payday Lender: 
-          <span class="legend-color lender" style="background-color: #1077CB;"></span>
+          <span class="legend-color lender" style="background-color: #0069E0;"></span>
         </div>
       </div>
     </script>
@@ -306,15 +317,15 @@
           zoom: 6,
           zoomMax: 15,
           popupZoom: 12,
-          circleR: 4,
+          circleR: { 0: 2, 7: 4, 8: 6, 10: 8, 11: 10 },
           circleSyle: {
             stroke: false,
-            color: '#1077CB',
+            color: '#0069E0',
             weight: 1,
             opacity: .9,
             fill: true,
-            fillColor: '#1077CB',
-            fillOpacity: 0.4
+            fillColor: '#0069E0',
+            fillOpacity: 0.7
           },
           tooltipSelector: '.tooltip-container',
           templates: {
@@ -333,8 +344,22 @@
           imagesDir = 'https://s3.amazonaws.com/data.minnpost/projects/minnpost-payday-lending/images/';
         }
         
+        // Determine radius given zoom
+        var getRadius = function(zoom) {
+          var radius = 1;
+          
+          // This is probably not the best way to do this
+          for (var i = 0; i <= zoom; i++) {
+            if (!_.isUndefined(config.circleR[i])) {
+              radius = config.circleR[i];
+            }
+          }
+          return radius;
+        };
+        
         // Main callback once data is loaded
         var drawMap = function(lendersData, povertyTileJSON) {
+          // Make map
           var map = new L.map(config.mapID, {
             minZoom: config.zoom,
             maxZoom: config.zoomMax
@@ -349,11 +374,13 @@
           $(config.templates.legend).appendTo($('#' + config.mapID));
           $('.legend-colors .legend-color').each(function() {
             var $this = $(this);
-            var color = Color($this.attr('data-base'));
+            var color = Color($this.attr('data-color'));
             var darken = parseFloat($this.attr('data-darken')) / 100;
-            console.log(color.darken(darken));
-            $(this).css('background-color', color.darken(darken).rgbString());
+            $this.css('background-color', $this.attr('data-color'));
           });
+          
+          // Edit tilejson
+          povertyTileJSON.attribution = null;
           
           // Overlay of poverty and tooltip
           var overlay = new wax.leaf.connector(povertyTileJSON);
@@ -381,16 +408,19 @@
             });
           
           // Add markers for for lenders
+          var radius = getRadius(config.zoom);
+          var markers = [];
           _.each(lendersData, function(lender, i) {
             var circle;
             var point = [parseFloat(lender.lat), parseFloat(lender.lon)];
             
             if (lender.lat !== '') {
               circle = new L.CircleMarker(point)
-                .setRadius(config.circleR)
+                .setRadius(radius)
                 .setStyle(config.circleSyle)
                 .bindPopup(_.template(config.templates.popup, lender));
               map.addLayer(circle);
+              markers.push(circle);
             }
           });
           
@@ -402,6 +432,14 @@
               var id = $(this).attr('data-id');
               var found = _.find(lendersData, function(lender) { return lender.id === id; });
               map.setView([parseFloat(found.lat), parseFloat(found.lon)], config.popupZoom);
+            });
+          });
+          
+          // Change radius of markers as zooming happens
+          map.on('zoomend', function(e) {
+            var r = getRadius(map.getZoom());
+            _.each(markers, function(m, i) {
+              m.setRadius(r);
             });
           });
         };
