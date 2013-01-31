@@ -309,7 +309,7 @@
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/underscore-1.3.3/underscore-min.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/jquery-custom-master-20120606/jquery-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/leaflet-0.4.5/leaflet.js"></script>
-    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/wax-v6.0.4/wax.leaf.min.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/leaflet-utfgrid-master-20130131/leaflet.utfgrid.js"></script>
     <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/leaflet-addons-0.1.1/leaflet-addons.min.js"></script>
     
 
@@ -321,6 +321,7 @@
       (function($, w, undefined) {
         var config = {
           mapID: 'map-payday-lending-poverty',
+          mapJSONP: 'http://api.tiles.mapbox.com/v3/minnpost.map-yl4k4j5g.jsonp',
           center: [46.52863469527167, -94.680175781254],
           zoom: 6,
           zoomMax: 15,
@@ -380,10 +381,6 @@
           map.attributionControl.setPrefix('');
           map.addControl(new L.Control.ZoomerButton(config.zoomBoxOptions));
           
-          // Base layer
-          var baseLayer = new L.TileLayer('http://{s}.tiles.mapbox.com/v3/minnpost.map-wi88b700/{z}/{x}/{y}.png');
-          map.addLayer(baseLayer);
-          
           // Add legend and make colors
           $(config.templates.legend).appendTo($('#' + config.mapID));
           $('.legend-colors .legend-color').each(function() {
@@ -391,33 +388,37 @@
             $this.css('background-color', $this.attr('data-color'));
           });
           
-          // Edit tilejson
-          povertyTileJSON.attribution = null;
+          // Add tile layer
+          var tilePath = povertyTileJSON.tiles[0].replace('a.', '{s}.');
+          var tileLayer = new L.TileLayer(tilePath);
+          map.addLayer(tileLayer);
           
-          // Overlay of poverty and tooltip
-          var overlay = new wax.leaf.connector(povertyTileJSON);
-          map.addLayer(overlay);
-          var interaction = wax.leaf.interaction()
-            .map(map)
-            .tilejson(povertyTileJSON)
-            .on({
-              on: function(e) {
-                var $tooltip = $(config.tooltipSelector);
-                if ($tooltip.length === 0) {
-                  $(config.templates.tooltipContainer)
-                    .appendTo($('#' + config.mapID));
-                }
-                $tooltip.show();
-                
-                // Check if we should show
-                if (typeof e.data != 'undefined') {
-                  $(config.tooltipSelector).html(_.template(config.templates.tooltip , e.data));
-                }
-              },
-              off: function(e) {
-                $(config.tooltipSelector).hide();
+          // Make UTFGrid layer and interactoin
+          var gridPath = povertyTileJSON.grids[0].replace('a.', '{s}.');
+          var interaction = new L.UtfGrid(gridPath + '?callback={cb}', {
+            resolution: 4
+          });
+          
+          interaction.on('mouseover', function(e) {
+            if (e.data) {
+              var $tooltip = $(config.tooltipSelector);
+              if ($tooltip.length === 0) {
+                $(config.templates.tooltipContainer)
+                  .appendTo($('#' + config.mapID));
               }
-            });
+              
+              $(config.tooltipSelector).html(_.template(config.templates.tooltip , e.data));
+              $tooltip.show();
+            }
+          });
+          
+          interaction.on('mouseout', function(e) {
+            if (e.data) {
+              $(config.tooltipSelector).hide();
+            }
+          });
+          
+          map.addLayer(interaction);
           
           // Add markers for for lenders
           var radius = getRadius(config.zoom);
@@ -464,7 +465,7 @@
           // Callback for JSONP data
           window.payday_lenders_callback = function(data) {
             // Get tilejson data
-            wax.tilejson('http://api.tiles.mapbox.com/v3/minnpost.payday-lending.jsonp', function(tilejson) {
+            $.getJSON(config.mapJSONP + '?callback=?', function(tilejson) {
               $('#application-container').html($('#template-map-container').html());
               drawMap(data, tilejson);
             });
